@@ -1,7 +1,7 @@
 CC = gcc
-LDFLAGS = -lGL -lGLU -lGLEW `sdl-config --libs`  -lm
-CFLAGS = -Wall -O3 `sdl-config --cflags`
-CDFLAGS = -Wall -O0 -g -Q -v -da `sdl-config --cflags`
+LDFLAGS = -lGL -lGLU -lGLEW `sdl-config --libs`  -lm -s 
+CFLAGS = -Wall -O3 `sdl-config --cflags` -s 
+CDFLAGS = -Wall -O0 -g -Q -v -da `sdl-config --cflags` -s
 OBJECTS = filemanager.o glbody.o sdlmanager.o glmanager.o shadermanager.o framebuffermanager.o matrixlib.o gamecode.o
 
 %.o: %.c
