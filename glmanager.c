@@ -24,6 +24,7 @@ GLuint velShader, posShader, starShader;
 GLuint vaoID, vboID, indicesID;
 GLuint starID, vaostarID;
 GLuint starprojpos, starviewpos, starviewprojpos;
+GLuint forceunipos;
 matrix4x4_t projectionmatrix, viewmatrix;
 
 //		   2d vert   |texcoords
@@ -149,6 +150,7 @@ int fillRandom(void){
 	srand(time(NULL));
 	GLfloat * posarray = malloc(4*SIZE*SIZE*sizeof(GLfloat));
 	GLfloat * velarray = malloc(4*SIZE*SIZE*sizeof(GLfloat));
+#ifndef FLAG
 	int i;
 	int top = 4*SIZE*SIZE;
 	for(i = 0; i< top; i+=4){
@@ -183,6 +185,48 @@ int fillRandom(void){
 	posarray[1] = 0.0;
 	posarray[2] = 0.0;
 	posarray[3] = 1000000000000.0;
+#else
+	int x, y;
+	for(x = 0; x< SIZE; x++){
+		for(y = 0; y < SIZE; y++){
+			int i = (x*SIZE+y)*4;
+//			posarray[i]   = ((float)x*2.0/(float)SIZE) -1.0;
+//			posarray[i+1] = ((float)y*2.0/(float)SIZE) -1.0;
+			posarray[i]   = (float)x/(float)SIZE;
+			posarray[i+1] = (float)y/(float)SIZE;
+			posarray[i+2] = 0.0;
+			posarray[i+2] = (((GLfloat)rand() / (GLfloat)RAND_MAX)-0.5)*0.1;
+			posarray[i+3] = 1.0; // movement multiplier
+			velarray[i]   = 0.0;
+			velarray[i+1] = 0.0;
+			velarray[i+2] = 0.0;
+			velarray[i+3] = 0.0;
+		}
+	}
+	x = 0;
+	for(y = 0; y < SIZE; y++){
+		int i = (x*SIZE+y)*4;
+		posarray[i+3] = 0.0; //they dont move, period
+	}
+/*
+	y = 0;
+	for(x = 0; x < SIZE; x++){
+		int i = (x*SIZE+y)*4;
+		posarray[i+3] = 0.0; //they dont move, period
+	}
+
+	x = SIZE-1;
+	for(y = 0; y < SIZE; y++){
+		int i = (x*SIZE+y)*4;
+		posarray[i+3] = 0.0; //they dont move, period
+	}
+	y = SIZE-1;
+	for(x = 0; x < SIZE; x++){
+		int i = (x*SIZE+y)*4;
+		posarray[i+3] = 0.0; //they dont move, period
+	}
+*/
+#endif
 	glBindTexture(GL_TEXTURE_2D, posTexid);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SIZE, SIZE, 0 , GL_RGBA, GL_FLOAT, posarray);
 	glBindTexture(GL_TEXTURE_2D, velTexid);
@@ -207,6 +251,7 @@ int glSetupUniforms(void){
 	glUniform1i(glGetUniformLocation(velShader, "velTex"), 2);
 	glUniform1i(glGetUniformLocation(starShader, "velTex"), 2);
 
+
 	glActiveTexture(GL_TEXTURE0);
 
 	return TRUE;
@@ -220,14 +265,18 @@ int glInit(void){
 	initShaderSystem();
 	initFrameBufferSystem();
 	#ifndef ONED
-	velShader = returnShader(createAndLoadShader("vel")).id;
+	#ifdef FLAG
+		velShader = returnShader(createAndLoadShader("flagvel")).id;
+		starShader = returnShader(createAndLoadShader("flag")).id;
+	#else
+		velShader = returnShader(createAndLoadShader("vel")).id;
+		starShader = returnShader(createAndLoadShader("star")).id;
+	#endif
 	posShader = returnShader(createAndLoadShader("pos")).id;
-	starShader = returnShader(createAndLoadShader("star")).id;
 	#else
 	velShader = returnShader(createAndLoadShader("velone")).id;
 	posShader = returnShader(createAndLoadShader("posone")).id;
 	starShader = returnShader(createAndLoadShader("starone")).id;
-
 	#endif
 	createFrameBuffersAndTextures(SIZE, SIZE);
 	framebuffer_t tf;
@@ -351,6 +400,8 @@ int initUniforms(void){
 	starprojpos = glGetUniformLocation(starShader, "proj");
 	starviewprojpos = glGetUniformLocation(starShader, "viewprojection");
 	starviewpos = glGetUniformLocation(starShader, "view");
+	forceunipos = glGetUniformLocation(velShader, "force");
+
 	return TRUE;
 }
 
@@ -359,10 +410,23 @@ int glRender(void){
 
 	glViewport(0,0, SIZE, SIZE);
 	glUseProgram(velShader);
+#ifdef FLAG
+	glUniform2f(forceunipos, ((GLfloat)rand() / (GLfloat)RAND_MAX)*0.1, -0.01);
+
+#endif
 	glBindFramebuffer(GL_FRAMEBUFFER, velFBid);
 	glBindTexture(GL_TEXTURE_2D, posTexid);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+#ifdef FLAG
+	glBlendFunc(GL_DST_COLOR, GL_ZERO); // for adding the current with the changes
+	glColor3f(0.8, 0.8, 0.8);
+	glUseProgram(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBlendFunc(GL_ONE, GL_ONE); // for adding the current with the changes
+	glColor3f(1.0, 1.0, 1.0);
+#endif
 
 	glUseProgram(posShader);
 	glBindFramebuffer(GL_FRAMEBUFFER, posFBid);

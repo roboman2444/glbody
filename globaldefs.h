@@ -3,7 +3,8 @@
 
 #define TRUE 1
 #define FALSE 0
-//#define ONED
+
+#define FLAG
 
 //includes
 #include <stdio.h>
