@@ -42,6 +42,11 @@ GLfloat fsverts[] ={-1.0, -1.0, 0.0,
 
 #endif
 
+#ifdef FLAG
+GLuint flagindicesid;
+GLuint * flagindices;
+#endif
+
 GLuint fsindices[] = {0,1,2, 2,3,0};
 
 extern int initUniforms(void);
@@ -57,6 +62,9 @@ int glVBO(void){
 	glGenBuffers(1, &vboID);
 	glGenBuffers(1, &indicesID);
 	glGenBuffers(1, &starID);
+#ifdef FLAG
+//	glGenBuffers(1, &flagindicesid);
+#endif
 
 	glBindVertexArray(vaostarID);
 
@@ -65,6 +73,22 @@ int glVBO(void){
 	memset(starverts, 0, 5*SIZE*SIZE*sizeof(GLfloat));
 #ifndef ONED
 	int x, y, i;
+#ifdef FLAG
+/*
+	flagindices = malloc((SIZE-1)*(SIZE-1)*6*sizeof(GLuint));
+	for(x = 0; x < SIZE-1; x++){
+		for(y = 0; y < SIZE-1; y++){
+			int i = (x*SIZE+y)*6;
+			flagindices[i] = x*SIZE+y;
+			flagindices[i+1] = (x+1)*SIZE+y;
+			flagindices[i+2] = (x+1)*SIZE+(y+1);
+			flagindices[i+3] = x*SIZE+y;
+			flagindices[i+4] = (x+1)*SIZE+(y+1);
+			flagindices[i+5] = x*SIZE+(y+1);
+		}
+	}
+*/
+#endif
 	for(x = 0; x< SIZE; x++){
 		for(y = 0; y< SIZE; y++){
 			i = (x*SIZE + y)*5;
@@ -96,7 +120,11 @@ int glVBO(void){
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glTexCoordPointer(2, GL_FLOAT, 5*sizeof(GLfloat), ((char*)NULL) + 3*sizeof(GLfloat));
 
-
+#ifdef FLAG
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, flagindicesid);
+//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (SIZE-1)*(SIZE-1)*6*sizeof(GLuint), flagindices, GL_STATIC_DRAW);
+//	free(flagindices);
+#endif
 	free(starverts);
 
 
@@ -109,6 +137,7 @@ int glVBO(void){
 	glVertexPointer(2, GL_FLOAT, 4*sizeof(GLfloat), NULL);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glTexCoordPointer(2, GL_FLOAT, 4*sizeof(GLfloat), ((char*)NULL) + 2*sizeof(GLfloat));
+
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(fsindices), fsindices, GL_STATIC_DRAW);
@@ -411,7 +440,11 @@ int glRender(void){
 	glViewport(0,0, SIZE, SIZE);
 	glUseProgram(velShader);
 #ifdef FLAG
-	glUniform2f(forceunipos, ((GLfloat)rand() / (GLfloat)RAND_MAX)*0.1, -0.01);
+	float magnitude = ((GLfloat)rand() / (GLfloat)RAND_MAX)*0.035;
+	float time = (float)clock() / CLOCKS_PER_SEC;
+	float dirz = sin(time) * 0.01;
+	float dirx = sin(time) * 0.01 + magnitude;
+	glUniform3f(forceunipos, dirx, -0.005, dirz);
 
 #endif
 	glBindFramebuffer(GL_FRAMEBUFFER, velFBid);
@@ -439,8 +472,14 @@ int glRender(void){
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, posTexid);
 	glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-	glDrawArrays(GL_POINTS, 0, SIZE*SIZE);
+#ifdef FLAG
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, flagindicesid);
 
+//	glDrawElements(GL_TRIANGLES, (SIZE-1)*(SIZE-1)*6, GL_UNSIGNED_INT, 0);
+#else
+//	glDrawArrays(GL_POINTS, 0, SIZE*SIZE);
+#endif
+	glDrawArrays(GL_POINTS, 0, SIZE*SIZE);
 
 
 
