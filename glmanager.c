@@ -13,7 +13,7 @@
 #include "matrixlib.h"
 #include "gamecode.h"
 
-#define SIZE 32
+#define SIZE 256
 
 int screenx;
 int screeny;
@@ -233,8 +233,24 @@ int fillRandom(void){
 		}
 	}
 	x = 0;
+	y = SIZE-1;
+	for(x = 0; x < SIZE/2; x++){
+		int i = (x*SIZE+y)*4;
+//		posarray[i]   +=y*0.707/(float)SIZE;
+//		posarray[i+1] = (float)y*0.707/(float)SIZE;
+		posarray[i+2] = 0.0;
+
+		posarray[i+3] = 0.0; //they dont move, period
+	}
+	x = 0;
+	y = 0;
+
 	for(y = 0; y < SIZE; y++){
 		int i = (x*SIZE+y)*4;
+//		posarray[i]   +=y*0.707/(float)SIZE;
+//		posarray[i+1] = (float)y*0.707/(float)SIZE;
+		posarray[i+2] = 0.0;
+
 		posarray[i+3] = 0.0; //they dont move, period
 	}
 /*
@@ -440,11 +456,12 @@ int glRender(void){
 	glViewport(0,0, SIZE, SIZE);
 	glUseProgram(velShader);
 #ifdef FLAG
-	float magnitude = ((GLfloat)rand() / (GLfloat)RAND_MAX)*0.035;
+//	float magnitude = ((GLfloat)rand() / (GLfloat)RAND_MAX)*0.05;
 	float time = (float)clock() / CLOCKS_PER_SEC;
 	float dirz = sin(time) * 0.01;
-	float dirx = sin(time) * 0.01 + magnitude;
-	glUniform3f(forceunipos, dirx, -0.005, dirz);
+//	float dirx = sin(time) * 0.01 + magnitude;
+	float dirx = sin(time) * 0.01;
+	glUniform3f(forceunipos, dirx, -0.02, dirz);
 
 #endif
 	glBindFramebuffer(GL_FRAMEBUFFER, velFBid);
@@ -453,7 +470,7 @@ int glRender(void){
 
 #ifdef FLAG
 	glBlendFunc(GL_DST_COLOR, GL_ZERO); // for adding the current with the changes
-	glColor3f(0.8, 0.8, 0.8);
+	glColor3f(0.4, 0.4, 0.4);
 	glUseProgram(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

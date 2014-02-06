@@ -43,6 +43,9 @@ int sdlInit(int width, int height, int bpp, int debugmode){
 	else			    videoFlags |= SDL_SWSURFACE;
 	if(videoInfo->blit_hw) 	    videoFlags |= SDL_HWACCEL;
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
 	return resizeWindow(width, height, bpp, debugmode);
 }
 

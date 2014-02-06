@@ -31,10 +31,10 @@ void main(){
 	}
 
 */
-	for(pos.x = -3.0; pos.x <= 3.0; pos.x+=1.0){
-		for(pos.y = -3.0; pos.y <= 3.0; pos.y+=1.0){
+	for(pos.x = -10.0; pos.x <= 10.0; pos.x+=1.0){
+		for(pos.y = -10.0; pos.y <= 10.0; pos.y+=1.0){
 			if(pos.x == 0.0 && pos.y == 0.0) continue; // dont try itself
-			vec2 samplevec = texCoord + pos/32.0;
+			vec2 samplevec = texCoord + pos/256.0;
 //			if(samplevec.x > 1.0 || samplevec.x < 0.0 || samplevec.y > 1.0 || samplevec.y < 0.0) continue;
 	//		vec3 testpos = textureOffset(posTex, texCoord, pos).rgb;
 			vec3 testpos = texture2D(posTex, samplevec).rgb;
@@ -43,13 +43,14 @@ void main(){
 			float mylength = length(delta);
 			vec3 forcedir = delta / mylength;
 //			gl_FragColor.rgb += (mylength - 0.0625) * forcedir;
-			float stretch = (mylength - (0.03125 * length(pos)));
+//			float stretch = (mylength - (0.03125 * length(pos)));
+			float stretch = (mylength - (0.00390625 * length(pos)));
 			gl_FragColor.rgb += stretch * forcedir;
 
 		}
 	}
 
-	gl_FragColor *= 0.05;
+	gl_FragColor *= 0.02;
 	gl_FragColor *= mypos.a;
 
 }
