@@ -35,7 +35,15 @@ void main(){
 		for(pos.y = -10.0; pos.y <= 10.0; pos.y+=1.0){
 			if(pos.x == 0.0 && pos.y == 0.0) continue; // dont try itself
 			vec2 samplevec = texCoord + pos/256.0;
-//			if(samplevec.x > 1.0 || samplevec.x < 0.0 || samplevec.y > 1.0 || samplevec.y < 0.0) continue;
+			if(samplevec.x > 1.0 || samplevec.x < 0.0){
+//				pos.x = 20.0;
+//				pos.y = 20.0;
+				continue;
+			}
+			if(samplevec.y > 1.0 || samplevec.y < 0.0){
+//				pos.y = 20.0;
+				continue;
+			}
 	//		vec3 testpos = textureOffset(posTex, texCoord, pos).rgb;
 			vec3 testpos = texture2D(posTex, samplevec).rgb;
 			vec3 delta = testpos - mypos.rgb;
